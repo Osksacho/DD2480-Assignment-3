@@ -40,6 +40,8 @@ import com.github.javaparser.printer.ConcreteSyntaxModel;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmElement;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmToken;
 import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CsmChild;
+
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -310,6 +312,14 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
         assertEquals(DifferenceElement.added(CsmElement.unindent()), differenceElements.get(index++));
         assertEquals(DifferenceElement.kept(CsmElement.token(GeneratedJavaParserConstants.RBRACE)), differenceElements.get(index++));
         assertEquals(index, differenceElements.size());
+    }
+
+    @AfterAll
+    static public void TestBranchCoverage()
+    {   
+        System.out.println("LexicalDifferenceCalculatorTest:");
+        LexicalDifferenceCalculator.BranchCoveragecalculatedSyntaxModelForNode.printCoverage();
+        
     }
 
     private boolean isAddedChild(DifferenceElement element, Class<? extends Node> childClass) {
