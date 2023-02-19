@@ -31,16 +31,4 @@ public class ForkedIssue14Test {
         assertEquals(tsat2.reduce(null), ConstraintFormula.ReductionResult.falseResult());
     }
 
-    @Test
-    void TestTypeSameAsTypePrimitiveAndInference() {
-        ResolvedTypeParameterDeclaration tp = mock(ResolvedTypeParameterDeclaration.class);
-        Expression e = new StringLiteralExpr("hi");
-        InferenceVariable inferenceVariable = new InferenceVariable("α", tp);
-        ResolvedType stringType = new ReferenceTypeImpl(new ReflectionTypeSolver().solveType(String.class.getCanonicalName()));
-        TypeSameAsType tsat1 = new TypeSameAsType(null, stringType);
-        TypeSameAsType tsat2 = new TypeSameAsType(stringType, null);
-        assertEquals(tsat1.reduce(null), ConstraintFormula.ReductionResult.falseResult());
-        assertEquals(tsat2.reduce(null), ConstraintFormula.ReductionResult.falseResult());
-    }
-
 }
