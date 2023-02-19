@@ -952,92 +952,15 @@ public class Difference {
         boolean used = false;
         boolean isPreviousElementNewline = (originalIndex > 0) && originalElements.get(originalIndex - 1).isNewline();
         if (isPreviousElementNewline) {
-            List<TextElement> elements = processIndentation(indentation, originalElements.subList(0, originalIndex - 1));
-            boolean nextIsRightBrace = nextIsRightBrace(originalIndex);
-            for (TextElement e : elements) {
-                if (!nextIsRightBrace && e instanceof TokenTextElement && originalElements.get(originalIndex).isToken(((TokenTextElement) e).getTokenKind())) {
-                    originalIndex++;
-                } else {
-                    nodeText.addElement(originalIndex++, e);
-                }
-            }
+            handleAddedDiffElementIndentation();
         } else if (isAfterLBrace(nodeText, originalIndex) && !isAReplacement(diffIndex)) {
             if (addedTextElement.isNewline()) {
                 used = true;
             }
-            nodeText.addElement(originalIndex++, new TokenTextElement(TokenTypes.eolTokenKind()));
-            // This remove the space in "{ }" when adding a new line
-            while (originalIndex >= 2 && originalElements.get(originalIndex - 2).isSpaceOrTab()) {
-                originalElements.remove(originalIndex - 2);
-                originalIndex--;
-            }
-            for (TextElement e : processIndentation(indentation, originalElements.subList(0, originalIndex - 1))) {
-                nodeText.addElement(originalIndex++, e);
-            }
-            // Indentation is painful...
-            // Sometimes we want to force indentation: this is the case when indentation was expected but
-            // was actually not there. For example if we have "{ }" we would expect indentation but it is
-            // not there, so when adding new elements we force it. However if the indentation has been
-            // inserted by us in this transformation we do not want to insert it again
-            if (!addedIndentation) {
-                for (TextElement e : indentationBlock()) {
-                    nodeText.addElement(originalIndex++, e);
-                }
-            }
+            addNewLineAndHandleIndentation();
         }
         if (!used) {
-            // Handling trailing comments
-            boolean sufficientTokensRemainToSkip = nodeText.numberOfElements() > originalIndex + 2;
-            boolean currentIsAComment = nodeText.getTextElement(originalIndex).isComment();
-            boolean previousIsAComment = originalIndex > 0 && nodeText.getTextElement(originalIndex - 1).isComment();
-            boolean currentIsNewline = nodeText.getTextElement(originalIndex).isNewline();
-            boolean isFirstElement = originalIndex == 0;
-            boolean previousIsWhiteSpace = originalIndex > 0 && nodeText.getTextElement(originalIndex - 1).isWhiteSpace();
-			boolean commentIsBeforeAddedElement = currentIsAComment && addedTextElement.getRange().isPresent()
-					&& nodeText.getTextElement(originalIndex).getRange()
-							.map(range -> range.isBefore(addedTextElement.getRange().get())).orElse(false);
-            if (sufficientTokensRemainToSkip && currentIsAComment && commentIsBeforeAddedElement) {
-                // Need to get behind the comment:
-                // FIXME: Why 2? This comment and the next newline?
-                originalIndex += 2;
-                // Defer originalIndex increment
-                nodeText.addElement(originalIndex, addedTextElement);
-                // We want to adjust the indentation while considering the new element that we added
-                originalIndex = adjustIndentation(indentation, nodeText, originalIndex, false);
-                // Now we can increment
-                originalIndex++;
-            } else if (currentIsNewline && previousIsAComment) {
-                /*
-                 * Manage the case where we want to add an element, after an expression which is followed by a comment on the same line.
-                 * This is not the same case as the one who handles the trailing comments, because in this case the node text element is a new line (not a comment)
-                 * For example : {@code private String a; // this is a }
-                 */
-                // Insert after the new line which follows this comment.
-                originalIndex++;
-                // We want to adjust the indentation while considering the new element that we added
-                originalIndex = adjustIndentation(indentation, nodeText, originalIndex, false);
-                // Defer originalIndex increment
-                nodeText.addElement(originalIndex, addedTextElement);
-                // Now we can increment.
-                originalIndex++;
-            } else if (currentIsNewline && addedTextElement.isChild()) {
-                // here we want to place the new child element after the current new line character.
-                // Except if indentation has been inserted just before this step (in the case where isPreviousElementNewline is true)
-                // or if the previous character is a space (it could be the case if we want to replace a statement)
-                // Example 1 : if we insert a statement (a duplicated method call expression ) after this one <code>  value();\n\n</code>
-                // we want to have this result <code>  value();\n  value();\n</code> not <code>  value();\n  \nvalue();</code>
-                // Example 2 : if we want to insert a statement after this one <code>  \n</code> we want to have <code>  value();\n</code>
-                // not <code>  \nvalue();</code> --> this case appears on member replacement for example
-                if (!isPreviousElementNewline && !isFirstElement && !previousIsWhiteSpace) {
-                    // Insert after the new line
-                    originalIndex++;
-                }
-                nodeText.addElement(originalIndex, addedTextElement);
-                originalIndex++;
-            } else {
-                nodeText.addElement(originalIndex, addedTextElement);
-                originalIndex++;
-            }
+            applyAddedDiffElementHandleTrailingComments(addedTextElement, isPreviousElementNewline);
         }
         if (addedTextElement.isNewline()) {
             boolean followedByUnindent = isFollowedByUnindent(diffElements, diffIndex);
@@ -1048,6 +971,95 @@ public class Difference {
             }
         }
         diffIndex++;
+    }
+
+    private void addNewLineAndHandleIndentation() {
+        nodeText.addElement(originalIndex++, new TokenTextElement(TokenTypes.eolTokenKind()));
+        // This remove the space in "{ }" when adding a new line
+        while (originalIndex >= 2 && originalElements.get(originalIndex - 2).isSpaceOrTab()) {
+            originalElements.remove(originalIndex - 2);
+            originalIndex--;
+        }
+        for (TextElement e : processIndentation(indentation, originalElements.subList(0, originalIndex - 1))) {
+            nodeText.addElement(originalIndex++, e);
+        }
+        // Indentation is painful...
+        // Sometimes we want to force indentation: this is the case when indentation was expected but
+        // was actually not there. For example if we have "{ }" we would expect indentation but it is
+        // not there, so when adding new elements we force it. However if the indentation has been
+        // inserted by us in this transformation we do not want to insert it again
+        if (!addedIndentation) {
+            for (TextElement e : indentationBlock()) {
+                nodeText.addElement(originalIndex++, e);
+            }
+        }
+    }
+
+    private void handleAddedDiffElementIndentation() {
+        List<TextElement> elements = processIndentation(indentation, originalElements.subList(0, originalIndex - 1));
+        boolean nextIsRightBrace = nextIsRightBrace(originalIndex);
+        for (TextElement e : elements) {
+            if (!nextIsRightBrace && e instanceof TokenTextElement && originalElements.get(originalIndex).isToken(((TokenTextElement) e).getTokenKind())) {
+                originalIndex++;
+            } else {
+                nodeText.addElement(originalIndex++, e);
+            }
+        }
+    }
+
+    private void applyAddedDiffElementHandleTrailingComments(TextElement addedTextElement, boolean isPreviousElementNewline) {
+        // Handling trailing comments
+        boolean sufficientTokensRemainToSkip = nodeText.numberOfElements() > originalIndex + 2;
+        boolean currentIsAComment = nodeText.getTextElement(originalIndex).isComment();
+        boolean previousIsAComment = originalIndex > 0 && nodeText.getTextElement(originalIndex - 1).isComment();
+        boolean currentIsNewline = nodeText.getTextElement(originalIndex).isNewline();
+        boolean isFirstElement = originalIndex == 0;
+        boolean previousIsWhiteSpace = originalIndex > 0 && nodeText.getTextElement(originalIndex - 1).isWhiteSpace();
+        boolean commentIsBeforeAddedElement = currentIsAComment && addedTextElement.getRange().isPresent()
+                && nodeText.getTextElement(originalIndex).getRange()
+                        .map(range -> range.isBefore(addedTextElement.getRange().get())).orElse(false);
+        if (sufficientTokensRemainToSkip && currentIsAComment && commentIsBeforeAddedElement) {
+            // Need to get behind the comment:
+            // FIXME: Why 2? This comment and the next newline?
+            originalIndex += 2;
+            // Defer originalIndex increment
+            nodeText.addElement(originalIndex, addedTextElement);
+            // We want to adjust the indentation while considering the new element that we added
+            originalIndex = adjustIndentation(indentation, nodeText, originalIndex, false);
+            // Now we can increment
+            originalIndex++;
+        } else if (currentIsNewline && previousIsAComment) {
+            /*
+             * Manage the case where we want to add an element, after an expression which is followed by a comment on the same line.
+             * This is not the same case as the one who handles the trailing comments, because in this case the node text element is a new line (not a comment)
+             * For example : {@code private String a; // this is a }
+             */
+            // Insert after the new line which follows this comment.
+            originalIndex++;
+            // We want to adjust the indentation while considering the new element that we added
+            originalIndex = adjustIndentation(indentation, nodeText, originalIndex, false);
+            // Defer originalIndex increment
+            nodeText.addElement(originalIndex, addedTextElement);
+            // Now we can increment.
+            originalIndex++;
+        } else if (currentIsNewline && addedTextElement.isChild()) {
+            // here we want to place the new child element after the current new line character.
+            // Except if indentation has been inserted just before this step (in the case where isPreviousElementNewline is true)
+            // or if the previous character is a space (it could be the case if we want to replace a statement)
+            // Example 1 : if we insert a statement (a duplicated method call expression ) after this one <code>  value();\n\n</code>
+            // we want to have this result <code>  value();\n  value();\n</code> not <code>  value();\n  \nvalue();</code>
+            // Example 2 : if we want to insert a statement after this one <code>  \n</code> we want to have <code>  value();\n</code>
+            // not <code>  \nvalue();</code> --> this case appears on member replacement for example
+            if (!isPreviousElementNewline && !isFirstElement && !previousIsWhiteSpace) {
+                // Insert after the new line
+                originalIndex++;
+            }
+            nodeText.addElement(originalIndex, addedTextElement);
+            originalIndex++;
+        } else {
+            nodeText.addElement(originalIndex, addedTextElement);
+            originalIndex++;
+        }
     }
 
     private String tokenDescription(int kind) {
