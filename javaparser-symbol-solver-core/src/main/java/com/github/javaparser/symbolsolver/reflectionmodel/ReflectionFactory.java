@@ -27,6 +27,7 @@ import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclar
 import com.github.javaparser.resolution.declarations.ResolvedTypeParameterDeclaration;
 import com.github.javaparser.resolution.model.typesystem.ReferenceTypeImpl;
 import com.github.javaparser.resolution.types.*;
+import com.github.javaparser.*;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
@@ -61,11 +62,13 @@ public class ReflectionFactory {
 
     public static ResolvedType typeUsageFor(java.lang.reflect.Type type, TypeSolver typeSolver) {
         if (type instanceof java.lang.reflect.TypeVariable) {
+            StaticJavaParser.TUFbranchReached[0] = true;
             java.lang.reflect.TypeVariable<?> tv = (java.lang.reflect.TypeVariable<?>) type;
             boolean declaredOnClass = tv.getGenericDeclaration() instanceof java.lang.reflect.Type;
             ResolvedTypeParameterDeclaration typeParameter = new ReflectionTypeParameter(tv, declaredOnClass, typeSolver);
             return new ResolvedTypeVariable(typeParameter);
         } else if (type instanceof ParameterizedType) {
+            StaticJavaParser.TUFbranchReached[1] = true;
             ParameterizedType pt = (ParameterizedType) type;
             ResolvedReferenceType rawType = typeUsageFor(pt.getRawType(), typeSolver).asReferenceType();
             List<java.lang.reflect.Type> actualTypes = new ArrayList<>();
@@ -74,42 +77,57 @@ public class ReflectionFactory {
             rawType = rawType.transformTypeParameters(tp -> typeUsageFor(actualTypes.remove(0), typeSolver)).asReferenceType();
             return rawType;
         } else if (type instanceof Class) {
+            StaticJavaParser.TUFbranchReached[2] = true;
             Class<?> c = (Class<?>) type;
             if (c.isPrimitive()) {
+                StaticJavaParser.TUFbranchReached[3] = true;
                 if (c.getName().equals(Void.TYPE.getName())) {
+                    StaticJavaParser.TUFbranchReached[4] = true;
                     return ResolvedVoidType.INSTANCE;
                 } else {
+                    StaticJavaParser.TUFbranchReached[5] = true;
                     return ResolvedPrimitiveType.byName(c.getName());
                 }
             } else if (c.isArray()) {
+                StaticJavaParser.TUFbranchReached[6] = true;
                 return new ResolvedArrayType(typeUsageFor(c.getComponentType(), typeSolver));
             } else {
+                StaticJavaParser.TUFbranchReached[7] = true;
                 return new ReferenceTypeImpl(typeDeclarationFor(c, typeSolver));
             }
         } else if (type instanceof GenericArrayType) {
+            StaticJavaParser.TUFbranchReached[8] = true;
             GenericArrayType genericArrayType = (GenericArrayType) type;
             return new ResolvedArrayType(typeUsageFor(genericArrayType.getGenericComponentType(), typeSolver));
         } else if (type instanceof WildcardType) {
+            StaticJavaParser.TUFbranchReached[9] = true;
             WildcardType wildcardType = (WildcardType) type;
             if (wildcardType.getLowerBounds().length > 0 && wildcardType.getUpperBounds().length > 0) {
+                StaticJavaParser.TUFbranchReached[10] = true;
                 if (wildcardType.getUpperBounds().length == 1 && wildcardType.getUpperBounds()[0].getTypeName().equals(JAVA_LANG_OBJECT)) {
+                    StaticJavaParser.TUFbranchReached[11] = true;
                     // ok, it does not matter
                 }
             }
             if (wildcardType.getLowerBounds().length > 0) {
+                StaticJavaParser.TUFbranchReached[12] = true;
                 if (wildcardType.getLowerBounds().length > 1) {
+                    StaticJavaParser.TUFbranchReached[13] = true;
                     throw new UnsupportedOperationException();
                 }
                 return ResolvedWildcard.superBound(typeUsageFor(wildcardType.getLowerBounds()[0], typeSolver));
             }
             if (wildcardType.getUpperBounds().length > 0) {
+                StaticJavaParser.TUFbranchReached[14] = true;
                 if (wildcardType.getUpperBounds().length > 1) {
+                    StaticJavaParser.TUFbranchReached[15] = true;
                     throw new UnsupportedOperationException();
                 }
                 return ResolvedWildcard.extendsBound(typeUsageFor(wildcardType.getUpperBounds()[0], typeSolver));
             }
             return ResolvedWildcard.UNBOUNDED;
         } else {
+            StaticJavaParser.TUFbranchReached[16] = true;
             throw new UnsupportedOperationException(type.getClass().getCanonicalName() + " " + type);
         }
     }

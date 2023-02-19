@@ -71,6 +71,26 @@ public final class StaticJavaParser {
     }
 
     /**
+     * Track which branches in ReflectionFactory::typeUsageFor have been reached
+     */
+    public static boolean[] TUFbranchReached = new boolean[22];
+
+    public static class BranchCoverageTUF
+    {
+        public static void printCoverage() {
+            for (int i = 0; i < 22; i++)
+            {
+                System.out.print("Branch " + i + ": ");
+                if (TUFbranchReached[i])
+                    System.out.print("reached");
+                else
+                    System.out.print("not reached");
+                System.out.println();
+            }
+        }
+    }
+
+    /**
      * Set the configuration for the static parse... methods.
      * This is a STATIC field, so modifying it will directly change how all static parse... methods work!
      */
