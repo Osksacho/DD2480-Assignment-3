@@ -110,24 +110,25 @@ public class ReflectionFactory {
                 }
             }
             if (wildcardType.getLowerBounds().length > 0) {
-                StaticJavaParser.TUFbranchReached[12] = true;
                 if (wildcardType.getLowerBounds().length > 1) {
-                    StaticJavaParser.TUFbranchReached[13] = true;
+                    StaticJavaParser.TUFbranchReached[12] = true;
                     throw new UnsupportedOperationException();
                 }
+                StaticJavaParser.TUFbranchReached[13] = true;
                 return ResolvedWildcard.superBound(typeUsageFor(wildcardType.getLowerBounds()[0], typeSolver));
             }
             if (wildcardType.getUpperBounds().length > 0) {
-                StaticJavaParser.TUFbranchReached[14] = true;
                 if (wildcardType.getUpperBounds().length > 1) {
-                    StaticJavaParser.TUFbranchReached[15] = true;
+                    StaticJavaParser.TUFbranchReached[14] = true;
                     throw new UnsupportedOperationException();
                 }
+                StaticJavaParser.TUFbranchReached[15] = true;
                 return ResolvedWildcard.extendsBound(typeUsageFor(wildcardType.getUpperBounds()[0], typeSolver));
             }
+            StaticJavaParser.TUFbranchReached[16] = true;
             return ResolvedWildcard.UNBOUNDED;
         } else {
-            StaticJavaParser.TUFbranchReached[16] = true;
+            StaticJavaParser.TUFbranchReached[17] = true;
             throw new UnsupportedOperationException(type.getClass().getCanonicalName() + " " + type);
         }
     }
