@@ -66,10 +66,7 @@ class ConstraintFormulaTest {
                 ConstraintFormula.ReductionResult.empty().withConstraint(new TypeSubtypeOfType(typeSolver, stringType, inferenceVariable)),
                 res1.getConstraint(0).reduce(BoundSet.empty()));
     }
-    @AfterAll
-    static void printReduceCoverage() {
-        TypeSameAsType.printReachedBranches();
-    }
+
 
 //    /**
 //     * From JLS 18.1.2
