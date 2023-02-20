@@ -359,7 +359,27 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
             System.out.println(e.getMessage());
         }
 
+    }@Test
+    void Test3() {
+        System.out.println("------------------ Running special test case 3 ------------------");
+
+        CsmString csm = new CsmString(ObservableProperty.COMMENT);
+
+        TextBlockLiteralExpr node = new TextBlockLiteralExpr();
+        
+        PropertyChange change = new PropertyChange(ObservableProperty.COMMENT, null, null);
+        
+        List<CsmElement> elements = new LinkedList<>();
+
+        try {
+            new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, change);
+        }  catch (Exception e) { 
+            System.out.println(e.getMessage());
+        }
+
     }
+    
+    
 
     @AfterAll
     static public void TestBranchCoverage()
