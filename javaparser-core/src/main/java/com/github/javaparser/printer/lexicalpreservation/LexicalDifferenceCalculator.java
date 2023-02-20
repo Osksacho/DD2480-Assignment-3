@@ -196,7 +196,7 @@ class LexicalDifferenceCalculator {
         }
     }
 
-    private void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
+    public void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
         if (csm instanceof CsmSequence) {
             BranchCoveragecalculatedSyntaxModelForNode.branchReached[0] = true;
             CsmSequence csmSequence = (CsmSequence) csm;
