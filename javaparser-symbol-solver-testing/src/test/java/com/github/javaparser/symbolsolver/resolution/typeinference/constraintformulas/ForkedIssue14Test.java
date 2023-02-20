@@ -12,6 +12,7 @@ import com.github.javaparser.symbolsolver.resolution.typeinference.ConstraintFor
 import com.github.javaparser.symbolsolver.resolution.typeinference.InferenceVariable;
 import com.github.javaparser.symbolsolver.resolution.typeinference.bounds.SameAsBound;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,6 +41,10 @@ public class ForkedIssue14Test {
                     ConstraintFormula.ReductionResult.oneBound(new SameAsBound(objectType, inferenceVariable)));
         assertEquals(new TypeSameAsType(inferenceVariable, objectType).reduce(null),
                 ConstraintFormula.ReductionResult.oneBound(new SameAsBound(inferenceVariable, objectType)));
+    }
+    @AfterAll
+    static void printReduceCoverage() {
+        TypeSameAsType.printReachedBranches();
     }
 
 }
