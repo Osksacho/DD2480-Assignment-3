@@ -37,14 +37,22 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.printer.ConcreteSyntaxModel;
+import com.github.javaparser.printer.SourcePrinter;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmElement;
+import com.github.javaparser.printer.concretesyntaxmodel.CsmList;
+import com.github.javaparser.printer.concretesyntaxmodel.CsmString;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmToken;
 import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CsmChild;
+import com.github.javaparser.printer.lexicalpreservation.changes.NoChange;
+import com.github.javaparser.printer.lexicalpreservation.changes.PropertyChange;
+
+import net.bytebuddy.dynamic.scaffold.TypeInitializer.None;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.github.javaparser.TokenTypes.eolTokenKind;
@@ -313,6 +321,27 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
         assertEquals(DifferenceElement.kept(CsmElement.token(GeneratedJavaParserConstants.RBRACE)), differenceElements.get(index++));
         assertEquals(index, differenceElements.size());
     }
+
+
+    @Test
+    void Test1() {
+        System.out.println("------------------ Running special test case 1 ------------------");
+
+        EnumConstantDeclaration node = considerEcd("A");
+
+        CsmList csmList = new CsmList(ObservableProperty.COMMENT);
+        csmList.property.type.node = false;
+        
+        List<CsmElement> elements = new LinkedList<>();
+
+        try {
+            new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csmList, node, elements, new NoChange());
+        }  catch (Exception e) { 
+            System.out.println(e.getMessage());
+        }
+
+    }
+
 
     @AfterAll
     static public void TestBranchCoverage()
