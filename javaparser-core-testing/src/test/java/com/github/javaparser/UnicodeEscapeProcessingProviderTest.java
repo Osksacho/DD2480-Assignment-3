@@ -20,6 +20,8 @@
  */
 package com.github.javaparser;
 
+import com.github.javaparser.printer.lexicalpreservation.Difference;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -119,6 +121,12 @@ public class UnicodeEscapeProcessingProviderTest {
 	@Test
 	void testPushBackWithBufferShift() throws IOException {
 		assertEquals("12345678\\uuxx", new String(read("12345678\\uuxx")));
+	}
+
+	@AfterAll
+	static void BranchCoverage()
+	{
+		Difference.printCoverage();
 	}
 	
 	static String read(String source) throws IOException {
