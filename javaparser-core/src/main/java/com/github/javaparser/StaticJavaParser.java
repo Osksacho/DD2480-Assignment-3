@@ -87,9 +87,9 @@ public final class StaticJavaParser {
     public static class BranchCoveragePPNT
     {
         public static void printCoverage() {
-            for (int i = 0; i < 22; i++)
+            for (int i = 0; i < 15; i++)
             {
-                System.out.print("Branch " + i + ": ");
+                System.out.print("PPTN Branch " + i + ": ");
                 if (PPNTbranchReached[i])
                     System.out.print("reached");
                 else
