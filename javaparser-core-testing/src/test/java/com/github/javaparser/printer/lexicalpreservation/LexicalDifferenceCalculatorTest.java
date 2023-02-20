@@ -379,7 +379,44 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
 
     }
     
-    
+    /*
+     * Used for test4, to try a unsupported instance of CsmElement
+     */
+    public class CsmUnsupportedClass implements CsmElement {
+        private final ObservableProperty property;
+
+        public CsmUnsupportedClass(ObservableProperty property) {
+            this.property = property;
+        }
+
+        public ObservableProperty getProperty() {
+            return property;
+        }
+
+        @Override
+        public void prettyPrint(Node node, SourcePrinter printer) { }
+
+        @Override
+        public String toString() { return ""; }
+    }
+
+    @Test
+    void Test4() {
+        System.out.println("------------------ Running special test case 4 ------------------");
+
+        EnumConstantDeclaration node = considerEcd("A");
+
+        CsmUnsupportedClass csm = new CsmUnsupportedClass(ObservableProperty.COMMENT);
+        
+        List<CsmElement> elements = new LinkedList<>();
+
+        try {
+            new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, new NoChange());
+        }  catch (Exception e) { 
+            System.out.println(e.getMessage());
+        }
+
+    }
 
     @AfterAll
     static public void TestBranchCoverage()
