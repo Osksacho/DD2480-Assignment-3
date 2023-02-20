@@ -176,80 +176,128 @@ class LexicalDifferenceCalculator {
         return calculatedSyntaxModelForNode(ConcreteSyntaxModel.forClass(node.getClass()), node);
     }
 
-    private void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
+    
+
+    public static class BranchCoveragecalculatedSyntaxModelForNode
+    {
+        public static boolean[] branchReached = new boolean[47];
+
+        public static void printCoverage() {
+            System.out.println("LexicalDifferenceCalculator::calculatedSyntaxModelForNode coverage:");
+            for (int i = 0; i < 47; i++)
+            {
+                System.out.print("Branch " + i + ": ");
+                if (branchReached[i])
+                    System.out.print("reached");
+                else
+                    System.out.print("not reached");
+                System.out.println();
+            }
+        }
+    }
+
+    public void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
         if (csm instanceof CsmSequence) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[0] = true;
             CsmSequence csmSequence = (CsmSequence) csm;
             csmSequence.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, elements, change));
         } else if (csm instanceof CsmComment) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[1] = true;
             // nothing to do
         } else if (csm instanceof CsmSingleReference) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[2] = true;
             CsmSingleReference csmSingleReference = (CsmSingleReference) csm;
             Node child;
             if (change instanceof PropertyChange && ((PropertyChange) change).getProperty() == csmSingleReference.getProperty()) {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[3] = true;
                 child = (Node) ((PropertyChange) change).getNewValue();
             } else {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[4] = true;
                 child = csmSingleReference.getProperty().getValueAsSingleReference(node);
             }
             if (child != null) {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[5] = true;
                 elements.add(new CsmChild(child));
             }
         } else if (csm instanceof CsmNone) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[6] = true;
             // nothing to do
         } else if (csm instanceof CsmToken) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[7] = true;
             elements.add(csm);
         } else if (csm instanceof CsmOrphanCommentsEnding) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[8] = true;
             // nothing to do
         } else if (csm instanceof CsmList) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[9] = true;
             CsmList csmList = (CsmList) csm;
             if (csmList.getProperty().isAboutNodes()) {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[10] = true;
                 Object rawValue = change.getValue(csmList.getProperty(), node);
                 NodeList<?> nodeList;
                 if (rawValue instanceof Optional) {
+                    BranchCoveragecalculatedSyntaxModelForNode.branchReached[11] = true;
                     Optional<?> optional = (Optional<?>) rawValue;
                     if (optional.isPresent()) {
+                        BranchCoveragecalculatedSyntaxModelForNode.branchReached[12] = true;
                         if (!(optional.get() instanceof NodeList)) {
+                            BranchCoveragecalculatedSyntaxModelForNode.branchReached[13] = true;
                             throw new IllegalStateException("Expected NodeList, found " + optional.get().getClass().getCanonicalName());
                         }
                         nodeList = (NodeList<?>) optional.get();
                     } else {
+                        BranchCoveragecalculatedSyntaxModelForNode.branchReached[14] = true;
                         nodeList = new NodeList<>();
                     }
                 } else {
+                    BranchCoveragecalculatedSyntaxModelForNode.branchReached[15] = true;
                     if (!(rawValue instanceof NodeList)) {
+                        BranchCoveragecalculatedSyntaxModelForNode.branchReached[16] = true;
                         throw new IllegalStateException("Expected NodeList, found " + rawValue.getClass().getCanonicalName());
                     }
                     nodeList = (NodeList<?>) rawValue;
                 }
                 if (!nodeList.isEmpty()) {
+                    BranchCoveragecalculatedSyntaxModelForNode.branchReached[17] = true;
                     calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
                     for (int i = 0; i < nodeList.size(); i++) {
+                        BranchCoveragecalculatedSyntaxModelForNode.branchReached[18] = true;
                         if (i != 0) {
+                            BranchCoveragecalculatedSyntaxModelForNode.branchReached[19] = true;
                             calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
                         }
                         elements.add(new CsmChild(nodeList.get(i)));
                         if (i != (nodeList.size() - 1)) {
+                            BranchCoveragecalculatedSyntaxModelForNode.branchReached[20] = true;
                             calculatedSyntaxModelForNode(csmList.getSeparatorPost(), node, elements, change);
                         }
                     }
                     calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
                 }
             } else {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[21] = true;
                 Collection<?> collection = (Collection<?>) change.getValue(csmList.getProperty(), node);
                 if (!collection.isEmpty()) {
+                    BranchCoveragecalculatedSyntaxModelForNode.branchReached[22] = true;
                     calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
                     boolean first = true;
                     for (Iterator<?> it = collection.iterator(); it.hasNext(); ) {
+                        BranchCoveragecalculatedSyntaxModelForNode.branchReached[23] = true;
                         if (!first) {
+                            BranchCoveragecalculatedSyntaxModelForNode.branchReached[24] = true;
                             calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
                         }
                         Object value = it.next();
                         if (value instanceof Modifier) {
+                            BranchCoveragecalculatedSyntaxModelForNode.branchReached[25] = true;
                             Modifier modifier = (Modifier) value;
                             elements.add(new CsmToken(toToken(modifier)));
                         } else {
+                            BranchCoveragecalculatedSyntaxModelForNode.branchReached[26] = true;
                             throw new UnsupportedOperationException(it.next().getClass().getSimpleName());
                         }
                         if (it.hasNext()) {
+                            BranchCoveragecalculatedSyntaxModelForNode.branchReached[27] = true;
                             calculatedSyntaxModelForNode(csmList.getSeparatorPost(), node, elements, change);
                         }
                         first = false;
@@ -258,56 +306,75 @@ class LexicalDifferenceCalculator {
                 }
             }
         } else if (csm instanceof CsmConditional) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[28] = true;
             CsmConditional csmConditional = (CsmConditional) csm;
             boolean satisfied = change.evaluate(csmConditional, node);
             if (satisfied) {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[29] = true;
                 calculatedSyntaxModelForNode(csmConditional.getThenElement(), node, elements, change);
             } else {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[30] = true;
                 calculatedSyntaxModelForNode(csmConditional.getElseElement(), node, elements, change);
             }
         } else if (csm instanceof CsmIndent) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[31] = true;
             elements.add(csm);
         } else if (csm instanceof CsmUnindent) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[32] = true;
             elements.add(csm);
         } else if (csm instanceof CsmAttribute) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[33] = true;
             CsmAttribute csmAttribute = (CsmAttribute) csm;
             Object value = change.getValue(csmAttribute.getProperty(), node);
             String text = value.toString();
             if (value instanceof Stringable) {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[34] = true;
                 text = ((Stringable) value).asString();
             }
             elements.add(new CsmToken(csmAttribute.getTokenType(node, value.toString(), text), text));
         } else if ((csm instanceof CsmString) && (node instanceof StringLiteralExpr)) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[35] = true;
             // fix #2382:
             // This method calculates the syntax model _after_ the change has been applied.
             // If the given change is a PropertyChange, the returned model should
             // contain the new value, otherwise the original/current value should be used.
             if (change instanceof PropertyChange) {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[36] = true;
                 elements.add(new CsmToken(GeneratedJavaParserConstants.STRING_LITERAL, "\"" + ((PropertyChange) change).getNewValue() + "\""));
             } else {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[37] = true;
                 elements.add(new CsmToken(GeneratedJavaParserConstants.STRING_LITERAL, "\"" + ((StringLiteralExpr) node).getValue() + "\""));
             }
         } else if ((csm instanceof CsmString) && (node instanceof TextBlockLiteralExpr)) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[38] = true;
             // FIXME: csm should be CsmTextBlock -- See also #2677
             if (change instanceof PropertyChange) {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[39] = true;
                 elements.add(new CsmToken(GeneratedJavaParserConstants.TEXT_BLOCK_LITERAL, "\"\"\"" + ((PropertyChange) change).getNewValue() + "\"\"\""));
             } else {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[40] = true;
                 elements.add(new CsmToken(GeneratedJavaParserConstants.TEXT_BLOCK_LITERAL, "\"\"\"" + ((TextBlockLiteralExpr) node).getValue() + "\"\"\""));
             }
         } else if ((csm instanceof CsmChar) && (node instanceof CharLiteralExpr)) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[41] = true;
             if (change instanceof PropertyChange) {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[42] = true;
                 elements.add(new CsmToken(GeneratedJavaParserConstants.CHAR, "'" + ((PropertyChange) change).getNewValue() + "'"));
             } else {
+                BranchCoveragecalculatedSyntaxModelForNode.branchReached[43] = true;
                 elements.add(new CsmToken(GeneratedJavaParserConstants.CHAR, "'" + ((CharLiteralExpr) node).getValue() + "'"));
             }
         } else if (csm instanceof CsmMix) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[44] = true;
             CsmMix csmMix = (CsmMix) csm;
             List<CsmElement> mixElements = new LinkedList<>();
             csmMix.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, mixElements, change));
             elements.add(new CsmMix(mixElements));
         } else if (csm instanceof CsmChild) {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[45] = true;
             elements.add(csm);
         } else {
+            BranchCoveragecalculatedSyntaxModelForNode.branchReached[46] = true;
             throw new UnsupportedOperationException(csm.getClass().getSimpleName() + " " + csm);
         }
     }

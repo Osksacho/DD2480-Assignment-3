@@ -37,12 +37,23 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.printer.ConcreteSyntaxModel;
+import com.github.javaparser.printer.SourcePrinter;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmElement;
+import com.github.javaparser.printer.concretesyntaxmodel.CsmList;
+import com.github.javaparser.printer.concretesyntaxmodel.CsmString;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmToken;
+import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CalculatedSyntaxModel;
 import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CsmChild;
+import com.github.javaparser.printer.lexicalpreservation.changes.NoChange;
+import com.github.javaparser.printer.lexicalpreservation.changes.PropertyChange;
+
+import net.bytebuddy.dynamic.scaffold.TypeInitializer.None;
+
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.github.javaparser.TokenTypes.eolTokenKind;
@@ -51,6 +62,7 @@ import static com.github.javaparser.ast.Modifier.Keyword.PUBLIC;
 import static com.github.javaparser.ast.Modifier.createModifierList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
 
@@ -310,6 +322,111 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
         assertEquals(DifferenceElement.added(CsmElement.unindent()), differenceElements.get(index++));
         assertEquals(DifferenceElement.kept(CsmElement.token(GeneratedJavaParserConstants.RBRACE)), differenceElements.get(index++));
         assertEquals(index, differenceElements.size());
+    }
+
+
+    @Test
+    void Test1() {
+        System.out.println("------------------ Running special test case 1 ------------------");
+
+        EnumConstantDeclaration node = considerEcd("A");
+
+        CsmList csmList = new CsmList(ObservableProperty.COMMENT);
+        csmList.property.type.node = false;
+        
+        List<CsmElement> elements = new LinkedList<>();
+
+        Exception exception = assertThrows(ClassCastException.class, () -> {
+            new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csmList, node, elements, new NoChange());
+        });
+    
+        assertTrue(exception.getMessage().contains("class java.util.Optional cannot be cast to class java.util.Collection"));
+
+
+    }
+    @Test
+    void Test2() {
+        System.out.println("------------------ Running special test case 2 ------------------");
+
+        CsmString csm = new CsmString(ObservableProperty.COMMENT);
+
+        StringLiteralExpr node = new StringLiteralExpr();
+        
+        PropertyChange change = new PropertyChange(ObservableProperty.COMMENT, null, null);
+        
+        List<CsmElement> elements = new LinkedList<>();
+
+        new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, change);
+
+        assertEquals(elements.size(), 1);
+        assertTrue(elements.get(0) instanceof CsmToken);
+        assertTrue(((CsmToken)elements.get(0)).getTokenType() == GeneratedJavaParserConstants.STRING_LITERAL);
+    }
+    
+    @Test
+    void Test3() {
+        System.out.println("------------------ Running special test case 3 ------------------");
+
+        CsmString csm = new CsmString(ObservableProperty.COMMENT);
+
+        TextBlockLiteralExpr node = new TextBlockLiteralExpr();
+        
+        PropertyChange change = new PropertyChange(ObservableProperty.COMMENT, null, null);
+        
+        List<CsmElement> elements = new LinkedList<>();
+
+        new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, change);
+        assertEquals(elements.size(), 1);
+        assertTrue(elements.get(0) instanceof CsmToken);
+        assertTrue(((CsmToken)elements.get(0)).getTokenType() == GeneratedJavaParserConstants.TEXT_BLOCK_LITERAL);
+
+    }
+    
+    /*
+     * Used for test4, to try a unsupported instance of CsmElement
+     */
+    public class CsmUnsupportedClass implements CsmElement {
+        private final ObservableProperty property;
+
+        public CsmUnsupportedClass(ObservableProperty property) {
+            this.property = property;
+        }
+
+        public ObservableProperty getProperty() {
+            return property;
+        }
+
+        @Override
+        public void prettyPrint(Node node, SourcePrinter printer) { }
+
+        @Override
+        public String toString() { return ""; }
+    }
+
+    @Test
+    void Test4() {
+        System.out.println("------------------ Running special test case 4 ------------------");
+
+        EnumConstantDeclaration node = considerEcd("A");
+
+        CsmUnsupportedClass csm = new CsmUnsupportedClass(ObservableProperty.COMMENT);
+        
+        List<CsmElement> elements = new LinkedList<>();
+
+        Exception exception = assertThrows(UnsupportedOperationException.class, () -> {
+            new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, new NoChange());
+        });
+    
+        assertTrue(exception.getMessage().contains("CsmUnsupportedClass"));
+
+    }
+
+    @AfterAll
+    static public void TestBranchCoverage()
+    {   
+        System.out.println("LexicalDifferenceCalculatorTest:");
+        LexicalDifferenceCalculator.BranchCoveragecalculatedSyntaxModelForNode.printCoverage();
+        
     }
 
     private boolean isAddedChild(DifferenceElement element, Class<? extends Node> childClass) {
