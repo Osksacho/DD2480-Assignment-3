@@ -42,6 +42,7 @@ import com.github.javaparser.printer.concretesyntaxmodel.CsmElement;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmList;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmString;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmToken;
+import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CalculatedSyntaxModel;
 import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CsmChild;
 import com.github.javaparser.printer.lexicalpreservation.changes.NoChange;
 import com.github.javaparser.printer.lexicalpreservation.changes.PropertyChange;
@@ -61,6 +62,7 @@ import static com.github.javaparser.ast.Modifier.Keyword.PUBLIC;
 import static com.github.javaparser.ast.Modifier.createModifierList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
 
@@ -334,11 +336,12 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
         
         List<CsmElement> elements = new LinkedList<>();
 
-        try {
+        Exception exception = assertThrows(ClassCastException.class, () -> {
             new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csmList, node, elements, new NoChange());
-        }  catch (Exception e) { 
-            System.out.println(e.getMessage());
-        }
+        });
+    
+        assertTrue(exception.getMessage().contains("class java.util.Optional cannot be cast to class java.util.Collection"));
+
 
     }
     @Test
@@ -353,11 +356,11 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
         
         List<CsmElement> elements = new LinkedList<>();
 
-        try {
-            new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, change);
-        }  catch (Exception e) { 
-            System.out.println(e.getMessage());
-        }
+        new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, change);
+
+        assertEquals(elements.size(), 1);
+        assertTrue(elements.get(0) instanceof CsmToken);
+        assertTrue(((CsmToken)elements.get(0)).getTokenType() == GeneratedJavaParserConstants.STRING_LITERAL);
     }
     
     @Test
@@ -372,11 +375,10 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
         
         List<CsmElement> elements = new LinkedList<>();
 
-        try {
-            new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, change);
-        }  catch (Exception e) { 
-            System.out.println(e.getMessage());
-        }
+        new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, change);
+        assertEquals(elements.size(), 1);
+        assertTrue(elements.get(0) instanceof CsmToken);
+        assertTrue(((CsmToken)elements.get(0)).getTokenType() == GeneratedJavaParserConstants.TEXT_BLOCK_LITERAL);
 
     }
     
@@ -411,11 +413,11 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
         
         List<CsmElement> elements = new LinkedList<>();
 
-        try {
+        Exception exception = assertThrows(UnsupportedOperationException.class, () -> {
             new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, elements, new NoChange());
-        }  catch (Exception e) { 
-            System.out.println(e.getMessage());
-        }
+        });
+    
+        assertTrue(exception.getMessage().contains("CsmUnsupportedClass"));
 
     }
 
