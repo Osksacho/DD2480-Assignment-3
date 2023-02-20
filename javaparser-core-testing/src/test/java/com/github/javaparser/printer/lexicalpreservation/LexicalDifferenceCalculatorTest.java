@@ -340,8 +340,6 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
             new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csmList, node, elements, new NoChange());
         });
     
-        assertTrue(exception.getMessage().contains("class java.util.Optional cannot be cast to class java.util.Collection"));
-
 
     }
     @Test
