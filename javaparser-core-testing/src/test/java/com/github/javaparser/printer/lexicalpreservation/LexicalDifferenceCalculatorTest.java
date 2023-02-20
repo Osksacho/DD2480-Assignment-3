@@ -358,8 +358,9 @@ class LexicalDifferenceCalculatorTest extends AbstractLexicalPreservingTest {
         }  catch (Exception e) { 
             System.out.println(e.getMessage());
         }
-
-    }@Test
+    }
+    
+    @Test
     void Test3() {
         System.out.println("------------------ Running special test case 3 ------------------");
 
