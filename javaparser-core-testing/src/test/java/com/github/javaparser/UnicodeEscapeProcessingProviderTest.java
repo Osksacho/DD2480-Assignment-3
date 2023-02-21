@@ -21,6 +21,7 @@
 package com.github.javaparser;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
 
 import java.io.IOException;
 
@@ -120,13 +121,17 @@ public class UnicodeEscapeProcessingProviderTest {
 	void testPushBackWithBufferShift() throws IOException {
 		assertEquals("12345678\\uuxx", new String(read("12345678\\uuxx")));
 	}
-	
+
+	@AfterAll
+	static void testApplyRemDiff(){
+		StaticJavaParser.printCoverage();
+	}
 	static String read(String source) throws IOException {
 		return process(provider(source));
 	}
 
 	static UnicodeEscapeProcessingProvider provider(String source) {
-		UnicodeEscapeProcessingProvider provider = new UnicodeEscapeProcessingProvider(10, 
+		UnicodeEscapeProcessingProvider provider = new UnicodeEscapeProcessingProvider(10,
 				new StringProvider(source));
 		return provider;
 	}

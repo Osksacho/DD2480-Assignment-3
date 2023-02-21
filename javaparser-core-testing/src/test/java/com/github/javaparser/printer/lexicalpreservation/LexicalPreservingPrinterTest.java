@@ -38,6 +38,7 @@ import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.TestUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -83,6 +84,11 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         assertTrue(getTextForNode(classA).getTextElement(6) instanceof TokenTextElement);
         assertEquals(GeneratedJavaParserConstants.EOF,
                 ((TokenTextElement) getTextForNode(classA).getTextElement(6)).getTokenKind());
+    }
+
+    @AfterAll
+    static void testApplyRemDiff(){
+        StaticJavaParser.printCoverage();
     }
 
     @Test
@@ -452,7 +458,6 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
 
         ExpressionStmt stmt = cu.findAll(ExpressionStmt.class).get(0);
         stmt.remove();
-
         assertEquals("class A {" + eol
                 + "\t" + "foo(int a, int b) {" + eol
                 + "\t\t" + "return a * b;" + eol

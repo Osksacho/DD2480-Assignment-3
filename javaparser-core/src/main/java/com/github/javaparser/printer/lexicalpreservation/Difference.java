@@ -33,7 +33,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.printer.concretesyntaxmodel.*;
 import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CsmChild;
-
+import com.github.javaparser.StaticJavaParser;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -516,34 +516,43 @@ public class Difference {
 
     private void applyRemovedDiffElement(RemovedGroup removedGroup, Removed removed, TextElement originalElement, boolean originalElementIsChild, boolean originalElementIsToken) {
         if (removed.isChild() && originalElementIsChild) {
+            StaticJavaParser.addBranch("1");
             ChildTextElement originalElementChild = (ChildTextElement) originalElement;
             if (originalElementChild.isComment()) {
+                StaticJavaParser.addBranch("2");
                 // We expected to remove a proper node but we found a comment in between.
                 // If the comment is associated to the node we want to remove we remove it as well, otherwise we keep it
                 Comment comment = (Comment) originalElementChild.getChild();
                 if (!comment.isOrphan() && comment.getCommentedNode().isPresent() && comment.getCommentedNode().get().equals(removed.getChild())) {
+                    StaticJavaParser.addBranch("3");
                     nodeText.removeElement(originalIndex);
                 } else {
+                    StaticJavaParser.addBranch("4");
                     originalIndex++;
                 }
             } else {
+                StaticJavaParser.addBranch("5");
                 nodeText.removeElement(originalIndex);
                 // When we don't try to remove a complete line 
                 // and removing the element is not the first action of a replacement (removal followed by addition)
                 // (in the latter case we keep the indentation)
                 // then we want to enforce the indentation.
                 if (isEnforcingIndentationActivable(removedGroup)) {
+                    StaticJavaParser.addBranch("6");
                 	// Since the element has been deleted we try to start the analysis from the element following the one that was deleted
                     originalIndex = considerEnforcingIndentation(nodeText, originalIndex);
                 }
                 // If in front we have one space and before also we had space let's drop one space
                 if (originalElements.size() > originalIndex && originalIndex > 0) {
+                    StaticJavaParser.addBranch("7");
                     if (originalElements.get(originalIndex).isWhiteSpace() && originalElements.get(originalIndex - 1).isWhiteSpace()) {
+                        StaticJavaParser.addBranch("8");
                         // However we do not want to do that when we are about to adding or removing elements
                         // The intention is not very clear maybe it should clarify this with examples!
                         // Are we to understand that we can only do this if there is a single modification to process
                         // OR or if the next change is to keep the element
                         if ((diffIndex + 1) == diffElements.size() || (diffElements.get(diffIndex + 1).isKept())) {
+                            StaticJavaParser.addBranch("9");
                             originalElements.remove(originalIndex--);
                         }
                     }
@@ -551,55 +560,71 @@ public class Difference {
                 // We need to know if, in the original list of elements, the deleted child node is immediately followed by the same comment.
                 // If so, it should also be deleted.
                 if (isFollowedByComment(originalIndex, originalElements) ) {
+                    StaticJavaParser.addBranch("10");
                 	int indexOfNextComment = posOfNextComment(originalIndex, originalElements);
                 	removeElements(originalIndex, indexOfNextComment, originalElements);
                 }
                 if (isRemovingIndentationActivable(removedGroup)) {
+                    StaticJavaParser.addBranch("11");
                 	// Since the element has been deleted we try to start the analysis from the previous element
                     originalIndex = considerRemovingIndentation(nodeText, originalIndex);
                 }
                 diffIndex++;
             }
         } else if (removed.isChild() && originalElement.isComment()) {
+            StaticJavaParser.addBranch("12");
         	// removing the comment first
         	nodeText.removeElement(originalIndex);
         	if (isRemovingIndentationActivable(removedGroup)) {
+                StaticJavaParser.addBranch("13");
                 originalIndex = considerRemovingIndentation(nodeText, originalIndex);
             }
         } else if (removed.isToken() && originalElementIsToken && (removed.getTokenType() == ((TokenTextElement) originalElement).getTokenKind() || // handle EOLs separately as their token kind might not be equal. This is because the 'removed'
         // element always has the current operating system's EOL as type
         (((TokenTextElement) originalElement).getToken().getCategory().isEndOfLine() && removed.isNewLine()))) {
+            StaticJavaParser.addBranch("14");
             nodeText.removeElement(originalIndex);
             diffIndex++;
         } else if ((removed.isWhiteSpaceNotEol() || removed.getElement() instanceof CsmIndent || removed.getElement() instanceof CsmUnindent)
         		&& originalElement.isSpaceOrTab()){
+            StaticJavaParser.addBranch("15");
         	// remove the current space
         	nodeText.removeElement(originalIndex);
         }else if (originalElementIsToken && originalElement.isWhiteSpaceOrComment()) {
+            StaticJavaParser.addBranch("16");
             originalIndex++;
             // skip the newline token which may be generated unnecessarily by the concrete syntax pattern
-            if (removed.isNewLine()) { 
+            if (removed.isNewLine()) {
+                StaticJavaParser.addBranch("17");
             	diffIndex++;
             }
         } else if (originalElement.isLiteral()) {
+            StaticJavaParser.addBranch("18");
             nodeText.removeElement(originalIndex);
             diffIndex++;
         } else if (removed.isPrimitiveType()) {
+            StaticJavaParser.addBranch("19");
             if (originalElement.isPrimitive()) {
+                StaticJavaParser.addBranch("20");
                 nodeText.removeElement(originalIndex);
                 diffIndex++;
             } else {
+                StaticJavaParser.addBranch("21");
                 throw new UnsupportedOperationException("removed " + removed.getElement() + " vs " + originalElement);
             }
         } else if (removed.isWhiteSpace() || removed.getElement() instanceof CsmIndent || removed.getElement() instanceof CsmUnindent) {
+            StaticJavaParser.addBranch("22");
             diffIndex++;
         } else if (originalElement.isWhiteSpace()) {
+            StaticJavaParser.addBranch("23");
             originalIndex++;
         } else if (removed.isChild()) {
+            StaticJavaParser.addBranch("24");
             // see issue #3721 this case is linked for example to a change of type of variable declarator
             nodeText.removeElement(originalIndex);
             diffIndex++;
         } else {
+            StaticJavaParser.addBranch("25");
             throw new UnsupportedOperationException("removed " + removed.getElement() + " vs " + originalElement);
         }
         cleanTheLineOfLeftOverSpace(removedGroup, removed);

@@ -40,7 +40,8 @@ import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.quality.NotNull;
 import com.github.javaparser.quality.Preconditions;
-
+import java.lang.*;
+import java.util.*;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -77,6 +78,18 @@ public final class StaticJavaParser {
     public static void setConfiguration(@NotNull ParserConfiguration configuration) {
         Preconditions.checkNotNull(configuration, "Parameter configuration can't be null.");
         localConfiguration.set(configuration);
+    }
+
+    public static HashSet<String> branchReached = new HashSet<>();
+
+    public static void printCoverage() {
+        for (String k : branchReached){
+            System.out.println("visited branch" + k);
+        }
+    }
+
+    public static void addBranch(String b){
+        branchReached.add(b);
     }
 
     /**
