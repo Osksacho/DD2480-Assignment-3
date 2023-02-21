@@ -1,0 +1,47 @@
+
+Before added tests:
+Branch 1: reached
+Branch 2: reached
+Branch 3: reached
+Branch 4: reached
+Branch 5: reached
+Branch 6: reached
+Branch 7: reached
+Branch 8: reached
+Branch 9: reached
+Branch 10: reached
+Branch 11: reached
+Branch 12: reached
+Branch 13: reached
+Branch 14: reached
+Branch 15: reached
+Branch 16: reached
+Branch 17: reached
+Branch 18: reached
+Branch 19: reached
+Branch 20: reached
+Branch 21: reached
+Branch 22: reached
+Branch 23: reached
+Branch 24: not reached
+Branch 25: reached
+Branch 26: reached
+Branch 27: reached
+Branch 28: not reached
+Branch 29: not reached
+Branch 30: reached
+Branch 31: not reached
+Branch 32: not reached
+Branch 33: reached
+Branch 34: not reached
+Branch 35: reached
+Branch 36: reached
+Branch 37: reached
+Branch 38: reached
+Branch 39: reached
+Branch 40: reached
+Branch 41: reached
+Branch 42: reached
+Branch 43: reached
+Branch 44: reached
+Branch 45: reached

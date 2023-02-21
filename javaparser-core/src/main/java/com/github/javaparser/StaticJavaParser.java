@@ -49,7 +49,6 @@ import java.nio.file.Path;
  * A simpler, static API than {@link JavaParser}.
  */
 public final class StaticJavaParser {
-
     // use ThreadLocal to resolve possible concurrency issues.
     private static final ThreadLocal<ParserConfiguration> localConfiguration = ThreadLocal.withInitial(ParserConfiguration::new);
 
@@ -82,7 +81,6 @@ public final class StaticJavaParser {
     /**
      * Track which branches in LexicalPreservingPrinter::prettyPrintingNodeText have been reached
      */
-
 
     /**
      * Parses the Java code contained in the {@link InputStream} and returns a

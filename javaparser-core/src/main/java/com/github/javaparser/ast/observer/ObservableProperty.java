@@ -135,13 +135,13 @@ public enum ObservableProperty {
     RANGE,
     COMMENTED_NODE;
 
-    enum Type {
+    public enum Type {
 
         SINGLE_ATTRIBUTE(false, false), SINGLE_REFERENCE(false, true), MULTIPLE_ATTRIBUTE(true, false), MULTIPLE_REFERENCE(true, true);
 
         private boolean multiple;
 
-        private boolean node;
+        public boolean node;
 
         Type(boolean multiple, boolean node) {
             this.multiple = multiple;
@@ -149,7 +149,7 @@ public enum ObservableProperty {
         }
     }
 
-    private Type type;
+    public Type type;
 
     private boolean derived;
 
