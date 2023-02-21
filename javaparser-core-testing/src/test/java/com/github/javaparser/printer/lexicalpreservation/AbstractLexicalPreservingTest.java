@@ -44,6 +44,11 @@ public abstract class AbstractLexicalPreservingTest {
     @AfterAll
     public static void tearDown() {
     }
+
+    @AfterAll
+    public static void coveragePrint() {
+        LexicalPreservingPrinter.BranchCoveragePPNT.printCoverage();
+    }
     
     @AfterEach
     public void reset() {

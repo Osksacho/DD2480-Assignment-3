@@ -55,6 +55,7 @@ import java.util.Optional;
 
 import com.github.javaparser.JavaToken;
 import com.github.javaparser.Range;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.DataKey;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
@@ -512,62 +513,95 @@ public class LexicalPreservingPrinter {
 																					  
     }
 
+
+    public static boolean[] PPNTbranchReached = new boolean[22];
+
+    public static class BranchCoveragePPNT
+    {
+        public static void printCoverage() {
+            for (int i = 0; i < 15; i++)
+            {
+                System.out.print("PPTN Branch " + i + ": ");
+                if (PPNTbranchReached[i])
+                    System.out.print("reached");
+                else
+                    System.out.print("not reached");
+                System.out.println();
+            }
+        }
+    }
+
     // 
     // Methods to handle transformations
     // 
     private static void prettyPrintingTextNode(Node node, NodeText nodeText) {
         if (node instanceof PrimitiveType) {
+            PPNTbranchReached[0] = true;
             PrimitiveType primitiveType = (PrimitiveType) node;
             switch(primitiveType.getType()) {
                 case BOOLEAN:
+                    PPNTbranchReached[1] = true;
                     nodeText.addToken(BOOLEAN, node.toString());
                     break;
                 case CHAR:
+                    PPNTbranchReached[2] = true;
                     nodeText.addToken(CHAR, node.toString());
                     break;
                 case BYTE:
+                    PPNTbranchReached[3] = true;
                     nodeText.addToken(BYTE, node.toString());
                     break;
                 case SHORT:
+                    PPNTbranchReached[4] = true;
                     nodeText.addToken(SHORT, node.toString());
                     break;
                 case INT:
+                    PPNTbranchReached[5] = true;
                     nodeText.addToken(INT, node.toString());
                     break;
                 case LONG:
+                    PPNTbranchReached[6] = true;
                     nodeText.addToken(LONG, node.toString());
                     break;
                 case FLOAT:
+                    PPNTbranchReached[7] = true;
                     nodeText.addToken(FLOAT, node.toString());
                     break;
                 case DOUBLE:
+                    PPNTbranchReached[8] = true;
                     nodeText.addToken(DOUBLE, node.toString());
                     break;
                 default:
+                    PPNTbranchReached[9] = true;
                     throw new IllegalArgumentException();
             }
             return;
         }
         if (node instanceof JavadocComment) {
+            PPNTbranchReached[10] = true;
         	Comment comment = (JavadocComment) node;
             nodeText.addToken(JAVADOC_COMMENT, comment.getHeader() + ((JavadocComment) node).getContent() + comment.getFooter());
             return;
         }
         if (node instanceof BlockComment) {
+            PPNTbranchReached[11] = true;
         	Comment comment = (BlockComment) node;
             nodeText.addToken(MULTI_LINE_COMMENT, comment.getHeader() + ((BlockComment) node).getContent() + comment.getFooter());
             return;
         }
         if (node instanceof LineComment) {
+            PPNTbranchReached[12] = true;
         	Comment comment = (LineComment) node;
             nodeText.addToken(SINGLE_LINE_COMMENT, comment.getHeader() + comment.getContent());
             return;
         }
         if (node instanceof Modifier) {
+            PPNTbranchReached[13] = true;
             Modifier modifier = (Modifier) node;
             nodeText.addToken(LexicalDifferenceCalculator.toToken(modifier), modifier.getKeyword().asString());
             return;
         }
+        PPNTbranchReached[14] = true;
         interpret(node, ConcreteSyntaxModel.forClass(node.getClass()), nodeText);
     }
 

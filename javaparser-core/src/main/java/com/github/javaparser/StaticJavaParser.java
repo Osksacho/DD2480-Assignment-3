@@ -79,6 +79,10 @@ public final class StaticJavaParser {
     }
 
     /**
+     * Track which branches in LexicalPreservingPrinter::prettyPrintingNodeText have been reached
+     */
+
+    /**
      * Parses the Java code contained in the {@link InputStream} and returns a
      * {@link CompilationUnit} that represents it.
      *
@@ -533,8 +537,5 @@ public final class StaticJavaParser {
         }
         throw new ParseProblemException(result.getProblems());
     }
-
-    private StaticJavaParser() {
-    }
-
 }
+
