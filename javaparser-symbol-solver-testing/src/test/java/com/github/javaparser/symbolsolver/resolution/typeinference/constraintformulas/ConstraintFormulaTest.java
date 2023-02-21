@@ -31,6 +31,7 @@ import com.github.javaparser.symbolsolver.resolution.typeinference.BoundSet;
 import com.github.javaparser.symbolsolver.resolution.typeinference.ConstraintFormula;
 import com.github.javaparser.symbolsolver.resolution.typeinference.InferenceVariable;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,6 +66,7 @@ class ConstraintFormulaTest {
                 ConstraintFormula.ReductionResult.empty().withConstraint(new TypeSubtypeOfType(typeSolver, stringType, inferenceVariable)),
                 res1.getConstraint(0).reduce(BoundSet.empty()));
     }
+
 
 //    /**
 //     * From JLS 18.1.2

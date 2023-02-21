@@ -50,7 +50,6 @@ import java.nio.file.Path;
  * A simpler, static API than {@link JavaParser}.
  */
 public final class StaticJavaParser {
-
     // use ThreadLocal to resolve possible concurrency issues.
     private static final ThreadLocal<ParserConfiguration> localConfiguration = ThreadLocal.withInitial(ParserConfiguration::new);
 

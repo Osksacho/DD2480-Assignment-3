@@ -20,6 +20,8 @@
  */
 package com.github.javaparser;
 
+import com.github.javaparser.printer.lexicalpreservation.Difference;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 
@@ -126,6 +128,13 @@ public class UnicodeEscapeProcessingProviderTest {
 	static void testApplyRemDiff(){
 		StaticJavaParser.printCoverage();
 	}
+
+	@Test
+	static void BranchCoverage()
+	{
+		Difference.printCoverage();
+	}
+
 	static String read(String source) throws IOException {
 		return process(provider(source));
 	}

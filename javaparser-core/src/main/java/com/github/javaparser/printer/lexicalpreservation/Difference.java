@@ -33,7 +33,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.printer.concretesyntaxmodel.*;
 import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CsmChild;
-import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -64,7 +64,13 @@ public class Difference {
 
     private final List<TextElement> indentation;
 
+    private static boolean[] branchReached = new boolean[46];
     private boolean addedIndentation = false;
+
+    public static void printCoverage() {
+        for (int i = 1; i < 46; i++)
+            System.out.println("Method applyAddedDiffElement: Branch " + i + (branchReached[i] ? " reached" : "not reached"));
+    }
 
     Difference(List<DifferenceElement> diffElements, NodeText nodeText, Node node) {
         if (nodeText == null) {
@@ -672,7 +678,7 @@ public class Difference {
     // increment originalIndex if we want to keep the original element
     // increment diffIndex if we want to skip the diff element
     private void applyKeptDiffElement(Kept kept, TextElement originalElement, boolean originalElementIsChild, boolean originalElementIsToken) {
-		if (originalElement.isComment()) {
+        if (originalElement.isComment()) {
 			originalIndex++;
         } else if (kept.isChild() && ((CsmChild) kept.getElement()).getChild() instanceof Comment) {
             diffIndex++;
@@ -958,7 +964,11 @@ public class Difference {
 
     private void applyAddedDiffElement(Added added) {
         if (added.isIndent()) {
+            // Id1
+            branchReached[1] = true;
             for (int i = 0; i < STANDARD_INDENTATION_SIZE; i++) {
+                // Id2
+                branchReached[2] = true;
                 indentation.add(new TokenTextElement(GeneratedJavaParserConstants.SPACE));
             }
             addedIndentation = true;
@@ -966,7 +976,13 @@ public class Difference {
             return;
         }
         if (added.isUnindent()) {
+            // Id3
+            branchReached[3] = true;
+            //id4
+            branchReached[4] = branchReached[4] || STANDARD_INDENTATION_SIZE > 0;
             for (int i = 0; i < STANDARD_INDENTATION_SIZE && !indentation.isEmpty(); i++) {
+                // Id5
+                branchReached[5] = true;
                 indentation.remove(indentation.size() - 1);
             }
             addedIndentation = false;
@@ -976,27 +992,52 @@ public class Difference {
         TextElement addedTextElement = added.toTextElement();
         boolean used = false;
         boolean isPreviousElementNewline = (originalIndex > 0) && originalElements.get(originalIndex - 1).isNewline();
+        // Id6
+        branchReached[6] = branchReached[6] || (originalIndex > 0);
+        // Id7
+        branchReached[7] = branchReached[7] || isPreviousElementNewline;
+        // Id 12
+        branchReached[12] = isAfterLBrace(nodeText, originalIndex) ||branchReached[12];
         if (isPreviousElementNewline) {
             List<TextElement> elements = processIndentation(indentation, originalElements.subList(0, originalIndex - 1));
             boolean nextIsRightBrace = nextIsRightBrace(originalIndex);
+            // Id8
+            branchReached[8] = branchReached[9] || nextIsRightBrace;
             for (TextElement e : elements) {
+                // Id9
+                branchReached[9] = true;
+                // Id 10
+                branchReached[10] = !nextIsRightBrace || branchReached[10];
                 if (!nextIsRightBrace && e instanceof TokenTextElement && originalElements.get(originalIndex).isToken(((TokenTextElement) e).getTokenKind())) {
+                    // Id11
+                    branchReached[11] = true;
                     originalIndex++;
                 } else {
                     nodeText.addElement(originalIndex++, e);
                 }
             }
+
         } else if (isAfterLBrace(nodeText, originalIndex) && !isAReplacement(diffIndex)) {
+            // Id13
+            branchReached[13] = true;
             if (addedTextElement.isNewline()) {
+                // Id14
+                branchReached[14] = true;
                 used = true;
             }
             nodeText.addElement(originalIndex++, new TokenTextElement(TokenTypes.eolTokenKind()));
             // This remove the space in "{ }" when adding a new line
+            // Id 15
+            branchReached[15] = branchReached[15] || originalIndex >= 2;
             while (originalIndex >= 2 && originalElements.get(originalIndex - 2).isSpaceOrTab()) {
+                // Id16
+                branchReached[16] = true;
                 originalElements.remove(originalIndex - 2);
                 originalIndex--;
             }
             for (TextElement e : processIndentation(indentation, originalElements.subList(0, originalIndex - 1))) {
+                // Id17
+                branchReached[17] = true;
                 nodeText.addElement(originalIndex++, e);
             }
             // Indentation is painful...
@@ -1005,23 +1046,45 @@ public class Difference {
             // not there, so when adding new elements we force it. However if the indentation has been
             // inserted by us in this transformation we do not want to insert it again
             if (!addedIndentation) {
+                // Id18
+                branchReached[18] = true;
                 for (TextElement e : indentationBlock()) {
+                    // Id19
+                    branchReached[19] = true;
                     nodeText.addElement(originalIndex++, e);
                 }
             }
         }
         if (!used) {
+            // Id20
+            branchReached[20] = true;
             // Handling trailing comments
-            boolean sufficientTokensRemainToSkip = nodeText.numberOfElements() > originalIndex + 2;
-            boolean currentIsAComment = nodeText.getTextElement(originalIndex).isComment();
-            boolean previousIsAComment = originalIndex > 0 && nodeText.getTextElement(originalIndex - 1).isComment();
-            boolean currentIsNewline = nodeText.getTextElement(originalIndex).isNewline();
-            boolean isFirstElement = originalIndex == 0;
-            boolean previousIsWhiteSpace = originalIndex > 0 && nodeText.getTextElement(originalIndex - 1).isWhiteSpace();
-			boolean commentIsBeforeAddedElement = currentIsAComment && addedTextElement.getRange().isPresent()
+            boolean sufficientTokensRemainToSkip = nodeText.numberOfElements() > originalIndex + 2;                         // Id21
+            boolean currentIsAComment = nodeText.getTextElement(originalIndex).isComment();                                 // Id22
+            boolean previousIsAComment = originalIndex > 0 && nodeText.getTextElement(originalIndex - 1).isComment(); // Id23, Id24
+            boolean currentIsNewline = nodeText.getTextElement(originalIndex).isNewline();                                  // Id25
+            boolean isFirstElement = originalIndex == 0;                                                                    // Id26
+            boolean previousIsWhiteSpace = originalIndex > 0 && nodeText.getTextElement(originalIndex - 1).isWhiteSpace(); // Id27
+			boolean commentIsBeforeAddedElement = currentIsAComment && addedTextElement.getRange().isPresent()              // Id 28, 29
 					&& nodeText.getTextElement(originalIndex).getRange()
 							.map(range -> range.isBefore(addedTextElement.getRange().get())).orElse(false);
+            branchReached[21] = sufficientTokensRemainToSkip || branchReached[21];
+            branchReached[22] = currentIsAComment || branchReached[22];
+            branchReached[23] = originalIndex > 0 || branchReached[23];
+            branchReached[24] = previousIsAComment || branchReached[24];
+            branchReached[25] = currentIsNewline || branchReached[25];
+            branchReached[26] = isFirstElement || branchReached[26];
+            branchReached[27] = previousIsWhiteSpace || branchReached[27];
+            branchReached[28] = (currentIsAComment && currentIsAComment && addedTextElement.getRange().isPresent()) || branchReached[28];
+            branchReached[29] = commentIsBeforeAddedElement || branchReached[29];
+            // Id30, 31 (33)
+            branchReached[33] = currentIsNewline || branchReached[33];
+            branchReached[30] = sufficientTokensRemainToSkip || branchReached[30];
+            branchReached[31] = currentIsAComment || branchReached[31];
             if (sufficientTokensRemainToSkip && currentIsAComment && commentIsBeforeAddedElement) {
+                // Id32
+                branchReached[32] = commentIsBeforeAddedElement || branchReached[32];
+                branchReached[27] = true;
                 // Need to get behind the comment:
                 // FIXME: Why 2? This comment and the next newline?
                 originalIndex += 2;
@@ -1032,6 +1095,8 @@ public class Difference {
                 // Now we can increment
                 originalIndex++;
             } else if (currentIsNewline && previousIsAComment) {
+                // Id34
+                branchReached[34] = true;
                 /*
                  * Manage the case where we want to add an element, after an expression which is followed by a comment on the same line.
                  * This is not the same case as the one who handles the trailing comments, because in this case the node text element is a new line (not a comment)
@@ -1046,6 +1111,8 @@ public class Difference {
                 // Now we can increment.
                 originalIndex++;
             } else if (currentIsNewline && addedTextElement.isChild()) {
+                // Id35
+                branchReached[35] = true;
                 // here we want to place the new child element after the current new line character.
                 // Except if indentation has been inserted just before this step (in the case where isPreviousElementNewline is true)
                 // or if the previous character is a space (it could be the case if we want to replace a statement)
@@ -1053,7 +1120,12 @@ public class Difference {
                 // we want to have this result <code>  value();\n  value();\n</code> not <code>  value();\n  \nvalue();</code>
                 // Example 2 : if we want to insert a statement after this one <code>  \n</code> we want to have <code>  value();\n</code>
                 // not <code>  \nvalue();</code> --> this case appears on member replacement for example
+                // Id36, 37
+                branchReached[36] = !isPreviousElementNewline || branchReached[36];
+                branchReached[37] = !isFirstElement || branchReached[36];
                 if (!isPreviousElementNewline && !isFirstElement && !previousIsWhiteSpace) {
+                    // Id38
+                    branchReached[38] = true;
                     // Insert after the new line
                     originalIndex++;
                 }
@@ -1065,10 +1137,20 @@ public class Difference {
             }
         }
         if (addedTextElement.isNewline()) {
-            boolean followedByUnindent = isFollowedByUnindent(diffElements, diffIndex);
-            boolean nextIsRightBrace = nextIsRightBrace(originalIndex);
-            boolean nextIsNewLine = originalElements.get(originalIndex).isNewline();
+            // Id39
+            branchReached[39] = true;
+            boolean followedByUnindent = isFollowedByUnindent(diffElements, diffIndex); // Id 40
+            boolean nextIsRightBrace = nextIsRightBrace(originalIndex);                 // Id 41
+            boolean nextIsNewLine = originalElements.get(originalIndex).isNewline();    // Id 42
+            // Id 43, 44
+            branchReached[40] = followedByUnindent || branchReached[40];
+            branchReached[41] = nextIsRightBrace || branchReached[41];
+            branchReached[42] = nextIsNewLine || branchReached[42];
+            branchReached[43] = !nextIsNewLine || branchReached[43];
+            branchReached[44] = !nextIsRightBrace || branchReached[44];
             if ((!nextIsNewLine && !nextIsRightBrace) || followedByUnindent) {
+                // Id45
+                branchReached[45] = true;
                 originalIndex = adjustIndentation(indentation, nodeText, originalIndex, followedByUnindent);
             }
         }
