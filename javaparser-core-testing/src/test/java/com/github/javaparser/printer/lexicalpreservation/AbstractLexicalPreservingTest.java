@@ -47,7 +47,7 @@ public abstract class AbstractLexicalPreservingTest {
 
     @AfterAll
     public static void coveragePrint() {
-        StaticJavaParser.BranchCoveragePPNT.printCoverage();
+        LexicalPreservingPrinter.BranchCoveragePPNT.printCoverage();
     }
     
     @AfterEach

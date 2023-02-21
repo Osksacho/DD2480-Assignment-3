@@ -82,22 +82,6 @@ public final class StaticJavaParser {
     /**
      * Track which branches in LexicalPreservingPrinter::prettyPrintingNodeText have been reached
      */
-    public static boolean[] PPNTbranchReached = new boolean[22];
-
-    public static class BranchCoveragePPNT
-    {
-        public static void printCoverage() {
-            for (int i = 0; i < 22; i++)
-            {
-                System.out.print("Branch " + i + ": ");
-                if (PPNTbranchReached[i])
-                    System.out.print("reached");
-                else
-                    System.out.print("not reached");
-                System.out.println();
-            }
-        }
-    }
 
     /**
      * Parses the Java code contained in the {@link InputStream} and returns a
