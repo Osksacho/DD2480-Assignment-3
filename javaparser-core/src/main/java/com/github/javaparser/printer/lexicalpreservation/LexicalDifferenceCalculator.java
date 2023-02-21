@@ -196,6 +196,77 @@ class LexicalDifferenceCalculator {
         }
     }
 
+    private void instanceOfCsmSingleReference(CsmSingleReference csmSingleReference, Node node, List<CsmElement> elements, Change change){
+        Node child;
+        if (change instanceof PropertyChange && ((PropertyChange) change).getProperty() == csmSingleReference.getProperty()) {
+            child = (Node) ((PropertyChange) change).getNewValue();
+        } else {
+            child = csmSingleReference.getProperty().getValueAsSingleReference(node);
+        }
+        if (child != null) {
+            elements.add(new CsmChild(child));
+        }
+    }
+
+    private void instanceOfCsmList(CsmList csmList, Node node, List<CsmElement> elements, Change change){
+        if (csmList.getProperty().isAboutNodes()) {
+            Object rawValue = change.getValue(csmList.getProperty(), node);
+            NodeList<?> nodeList;
+            if (rawValue instanceof Optional) {
+                Optional<?> optional = (Optional<?>) rawValue;
+                if (optional.isPresent()) {
+                    if (!(optional.get() instanceof NodeList)) {
+                        throw new IllegalStateException("Expected NodeList, found " + optional.get().getClass().getCanonicalName());
+                    }
+                    nodeList = (NodeList<?>) optional.get();
+                } else {
+                    nodeList = new NodeList<>();
+                }
+            } else {
+                if (!(rawValue instanceof NodeList)) {
+                    throw new IllegalStateException("Expected NodeList, found " + rawValue.getClass().getCanonicalName());
+                }
+                nodeList = (NodeList<?>) rawValue;
+            }
+            if (!nodeList.isEmpty()) {
+                calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
+                for (int i = 0; i < nodeList.size(); i++) {
+                    if (i != 0) {
+                        calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
+                    }
+                    elements.add(new CsmChild(nodeList.get(i)));
+                    if (i != (nodeList.size() - 1)) {
+                        calculatedSyntaxModelForNode(csmList.getSeparatorPost(), node, elements, change);
+                    }
+                }
+                calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
+            }
+        } else {
+            Collection<?> collection = (Collection<?>) change.getValue(csmList.getProperty(), node);
+            if (!collection.isEmpty()) {
+                calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
+                boolean first = true;
+                for (Iterator<?> it = collection.iterator(); it.hasNext(); ) {
+                    if (!first) {
+                        calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
+                    }
+                    Object value = it.next();
+                    if (value instanceof Modifier) {
+                        Modifier modifier = (Modifier) value;
+                        elements.add(new CsmToken(toToken(modifier)));
+                    } else {
+                        throw new UnsupportedOperationException(it.next().getClass().getSimpleName());
+                    }
+                    if (it.hasNext()) {
+                        calculatedSyntaxModelForNode(csmList.getSeparatorPost(), node, elements, change);
+                    }
+                    first = false;
+                }
+                calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
+            }
+        }
+    }
+
     public void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
         if (csm instanceof CsmSequence) {
             CsmSequence csmSequence = (CsmSequence) csm;
@@ -204,15 +275,7 @@ class LexicalDifferenceCalculator {
             // nothing to do
         } else if (csm instanceof CsmSingleReference) {
             CsmSingleReference csmSingleReference = (CsmSingleReference) csm;
-            Node child;
-            if (change instanceof PropertyChange && ((PropertyChange) change).getProperty() == csmSingleReference.getProperty()) {
-                child = (Node) ((PropertyChange) change).getNewValue();
-            } else {
-                child = csmSingleReference.getProperty().getValueAsSingleReference(node);
-            }
-            if (child != null) {
-                elements.add(new CsmChild(child));
-            }
+            instanceOfCsmSingleReference(csmSingleReference, node, elements, change);
         } else if (csm instanceof CsmNone) {
             // nothing to do
         } else if (csm instanceof CsmToken) {
@@ -221,62 +284,7 @@ class LexicalDifferenceCalculator {
             // nothing to do
         } else if (csm instanceof CsmList) {
             CsmList csmList = (CsmList) csm;
-            if (csmList.getProperty().isAboutNodes()) {
-                Object rawValue = change.getValue(csmList.getProperty(), node);
-                NodeList<?> nodeList;
-                if (rawValue instanceof Optional) {
-                    Optional<?> optional = (Optional<?>) rawValue;
-                    if (optional.isPresent()) {
-                        if (!(optional.get() instanceof NodeList)) {
-                            throw new IllegalStateException("Expected NodeList, found " + optional.get().getClass().getCanonicalName());
-                        }
-                        nodeList = (NodeList<?>) optional.get();
-                    } else {
-                        nodeList = new NodeList<>();
-                    }
-                } else {
-                    if (!(rawValue instanceof NodeList)) {
-                        throw new IllegalStateException("Expected NodeList, found " + rawValue.getClass().getCanonicalName());
-                    }
-                    nodeList = (NodeList<?>) rawValue;
-                }
-                if (!nodeList.isEmpty()) {
-                    calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
-                    for (int i = 0; i < nodeList.size(); i++) {
-                        if (i != 0) {
-                            calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
-                        }
-                        elements.add(new CsmChild(nodeList.get(i)));
-                        if (i != (nodeList.size() - 1)) {
-                            calculatedSyntaxModelForNode(csmList.getSeparatorPost(), node, elements, change);
-                        }
-                    }
-                    calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
-                }
-            } else {
-                Collection<?> collection = (Collection<?>) change.getValue(csmList.getProperty(), node);
-                if (!collection.isEmpty()) {
-                    calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
-                    boolean first = true;
-                    for (Iterator<?> it = collection.iterator(); it.hasNext(); ) {
-                        if (!first) {
-                            calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
-                        }
-                        Object value = it.next();
-                        if (value instanceof Modifier) {
-                            Modifier modifier = (Modifier) value;
-                            elements.add(new CsmToken(toToken(modifier)));
-                        } else {
-                            throw new UnsupportedOperationException(it.next().getClass().getSimpleName());
-                        }
-                        if (it.hasNext()) {
-                            calculatedSyntaxModelForNode(csmList.getSeparatorPost(), node, elements, change);
-                        }
-                        first = false;
-                    }
-                    calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
-                }
-            }
+            instanceOfCsmList(csmList, node, elements, change);
         } else if (csm instanceof CsmConditional) {
             CsmConditional csmConditional = (CsmConditional) csm;
             boolean satisfied = change.evaluate(csmConditional, node);
