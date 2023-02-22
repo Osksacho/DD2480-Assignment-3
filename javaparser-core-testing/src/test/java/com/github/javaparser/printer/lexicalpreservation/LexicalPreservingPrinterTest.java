@@ -88,7 +88,7 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
 
     @AfterAll
     static void testApplyRemDiff(){
-        StaticJavaParser.printCoverage();
+        StaticJavaParser.applyRemDiffCoverage();
     }
 
     @Test

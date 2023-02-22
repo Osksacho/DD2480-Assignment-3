@@ -126,7 +126,7 @@ public class UnicodeEscapeProcessingProviderTest {
 
 	@AfterAll
 	static void testApplyRemDiff(){
-		StaticJavaParser.printCoverage();
+		StaticJavaParser.applyRemDiffCoverage();
 	}
 
 	@Test

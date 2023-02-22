@@ -79,16 +79,16 @@ public final class StaticJavaParser {
         localConfiguration.set(configuration);
     }
 
-    public static HashSet<String> branchReached = new HashSet<>();
+    public static HashSet<String> branch = new HashSet<>();
 
-    public static void printCoverage() {
-        for (String k : branchReached){
-            System.out.println("visited branch" + k);
+    public static void applyRemDiffCoverage() {
+        for (String k : branch){
+            System.out.println("applyRemovedDiffElement visited branch : " + k);
         }
     }
 
     public static void addBranch(String b){
-        branchReached.add(b);
+        branch.add(b);
     }
 
     /**
