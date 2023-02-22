@@ -519,7 +519,7 @@ public class LexicalPreservingPrinter {
     public static class BranchCoveragePPNT
     {
         public static void printCoverage() {
-            for (int i = 0; i < 15; i++)
+            for (int i = 1; i < 15; i++)
             {
                 System.out.print("PPTN Branch " + i + ": ");
                 if (PPNTbranchReached[i])
@@ -536,7 +536,6 @@ public class LexicalPreservingPrinter {
     // 
     private static void prettyPrintingTextNode(Node node, NodeText nodeText) {
         if (node instanceof PrimitiveType) {
-            PPNTbranchReached[0] = true;
             PrimitiveType primitiveType = (PrimitiveType) node;
             switch(primitiveType.getType()) {
                 case BOOLEAN:
