@@ -23,6 +23,7 @@ package com.github.javaparser;
 import com.github.javaparser.printer.lexicalpreservation.Difference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
 
 import java.io.IOException;
 
@@ -124,17 +125,22 @@ public class UnicodeEscapeProcessingProviderTest {
 	}
 
 	@AfterAll
+	static void testApplyRemDiff(){
+		StaticJavaParser.applyRemDiffCoverage();
+	}
+
+	@Test
 	static void BranchCoverage()
 	{
 		Difference.printCoverage();
 	}
-	
+
 	static String read(String source) throws IOException {
 		return process(provider(source));
 	}
 
 	static UnicodeEscapeProcessingProvider provider(String source) {
-		UnicodeEscapeProcessingProvider provider = new UnicodeEscapeProcessingProvider(10, 
+		UnicodeEscapeProcessingProvider provider = new UnicodeEscapeProcessingProvider(10,
 				new StringProvider(source));
 		return provider;
 	}
