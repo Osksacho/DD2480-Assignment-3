@@ -83,6 +83,10 @@ public class Difference {
         this.indentation = LexicalPreservingPrinter.findIndentation(node);
     }
 
+    String getNodeTextString(){
+        return nodeText.expand();
+    }
+
     /*
      * Returns the indentation used after the last line break
      */
@@ -520,7 +524,7 @@ public class Difference {
         return removedElementsMap;
     }
 
-    private void applyRemovedDiffElement(RemovedGroup removedGroup, Removed removed, TextElement originalElement, boolean originalElementIsChild, boolean originalElementIsToken) {
+    public void applyRemovedDiffElement(RemovedGroup removedGroup, Removed removed, TextElement originalElement, boolean originalElementIsChild, boolean originalElementIsToken) {
         if (removed.isChild() && originalElementIsChild) {
             StaticJavaParser.addBranch("1");
             ChildTextElement originalElementChild = (ChildTextElement) originalElement;

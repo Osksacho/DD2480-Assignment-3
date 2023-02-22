@@ -28,8 +28,11 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
+import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.UnionType;
@@ -39,6 +42,16 @@ import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
+import com.github.javaparser.printer.concretesyntaxmodel.CsmIndent;
+import com.github.javaparser.printer.lexicalpreservation.Removed;
+import com.github.javaparser.printer.lexicalpreservation.TokenTextElement;
+import com.github.javaparser.printer.lexicalpreservation.Difference;
+import com.github.javaparser.printer.lexicalpreservation.ChildTextElement;
+import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalculator.CsmChild;
+import com.github.javaparser.JavaToken;
+import com.github.javaparser.JavaToken.Kind;
+import com.github.javaparser.ast.comments.Comment;
+import java.util.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -84,6 +97,29 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         assertTrue(getTextForNode(classA).getTextElement(6) instanceof TokenTextElement);
         assertEquals(GeneratedJavaParserConstants.EOF,
                 ((TokenTextElement) getTextForNode(classA).getTextElement(6)).getTokenKind());
+    }
+
+    @Test
+    void removeIfWhiteSpace(){
+        considerCode("class  A {}");
+        ClassOrInterfaceDeclaration classA = cu.getClassByName("A").get();
+        NodeText nt = getTextForNode(classA);
+        // create white space token
+        TokenTextElement tte = new TokenTextElement(new JavaToken(1));
+
+        Removed obj = new Removed(new CsmIndent());
+
+        ArrayList<DifferenceElement> diffElements = new ArrayList<>();
+        diffElements.add(obj);
+        Difference diff = new Difference(diffElements,nt, classA);
+
+        ArrayList<Removed> rmList = new ArrayList<>();
+        rmList.add(obj);
+        RemovedGroup rg = RemovedGroup.of(0, rmList);
+
+        diff.applyRemovedDiffElement(rg, obj, tte, false,true);
+
+        assertEquals("  A {}", diff.getNodeTextString());
     }
 
     @AfterAll
@@ -153,6 +189,39 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(t);
         assertEquals(Arrays.asList("int"),
                 nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+    }
+
+    @Test
+    void removeNodeWithAssociatedComment() {
+
+        considerCode(" class Foo {\n" +
+                "}");
+        // create associated comment
+        ClassOrInterfaceDeclaration decl = cu.getClassByName("Foo").get();
+        Comment c = new LineComment();
+        decl.setComment(c);
+
+        TextElement cte = new ChildTextElement(c);
+        // create remove object with the commented node as child
+        Removed obj = new Removed(new CsmChild(decl));
+
+        ArrayList<DifferenceElement> diffElements = new ArrayList<>();
+        diffElements.add(obj);
+
+        NodeText nt = getTextForNode(decl);
+
+        Difference diff = new Difference(diffElements,nt, decl);
+
+        //create remove group
+        ArrayList<Removed> rmList = new ArrayList<>();
+        rmList.add(obj);
+        RemovedGroup rg = RemovedGroup.of(0, rmList);
+
+        diff.applyRemovedDiffElement(rg, obj, cte, true,false);
+
+        assertEqualsStringIgnoringEol(" //empty\n" +
+                "Foo {\n" +
+                "}", LexicalPreservingPrinter.print(cu));
     }
 
     @Test
